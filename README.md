@@ -159,8 +159,6 @@ Application Restored     ✅
 
 ## References
 
-- Harness Continuous Delivery Documentation
-- Harness Kubernetes Deployments
-- Harness Failure Strategies
-- Kubernetes Rolling Updates
-- Kubernetes Rollback
+- Harness Continuous Delivery Documentation - https://developer.harness.io/docs/continuous-delivery/
+- Harness Kubernetes Deployments - https://developer.harness.io/docs/continuous-delivery/deploy-srv-diff-platforms/kubernetes/kubernetes-cd-quickstart/
+- Harness Failure Strategies - https://developer.harness.io/docs/platform/pipelines/failure-handling/define-a-failure-strategy-on-stages-and-steps/
