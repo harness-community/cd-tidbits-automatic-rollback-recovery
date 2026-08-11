@@ -1,0 +1,103 @@
+pipeline:
+  name: harness-rollback
+  identifier: harnessrollback
+  projectIdentifier: Harnessdemo
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: Build
+        identifier: Build
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          caching:
+            enabled: true
+            override: true
+          buildIntelligence:
+            enabled: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec:
+              imageSpec:
+                imageName: ubuntu-latest
+          execution:
+            steps:
+              - step:
+                  type: BuildAndPushDockerRegistry
+                  name: Build and Push
+                  identifier: Build_and_Push
+                  spec:
+                    connectorRef: Manjunathpersonal
+                    repo: pes2ug19cs219/harness-rollback
+                    tags:
+                      - <+input>
+                      - latest
+                    dockerfile: app/Dockerfile
+                    context: app
+    - stage:
+        name: Deploy
+        identifier: Deploy
+        description: ""
+        type: Deployment
+        delegateSelectors:
+          - kubernetes-delegate
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: StageRollback
+        spec:
+          deploymentType: Kubernetes
+          service:
+            serviceRef: harnessapp
+            serviceInputs:
+              serviceDefinition:
+                type: Kubernetes
+                spec:
+                  artifacts:
+                    primary:
+                      sources:
+                        - identifier: dockerhub
+                          type: DockerRegistry
+                          spec:
+                            tag: <+input>
+          environment:
+            environmentRef: dev
+            deployToAll: false
+            infrastructureDefinitions:
+              - identifier: rancherdesktop
+          execution:
+            steps:
+              - step:
+                  type: K8sRollingDeploy
+                  name: rolling-upgrade
+                  identifier: rollingupgrade
+                  timeout: 1m
+                  spec:
+                    skipDryRun: false
+                    pruningEnabled: false
+                  failureStrategies:
+                    - onFailure:
+                        errors:
+                          - AllErrors
+                        action:
+                          type: StageRollback
+            rollbackSteps:
+              - step:
+                  type: K8sRollingRollback
+                  name: rolling-rollback
+                  identifier: rollingrollback
+                  timeout: 10m
+                  spec:
+                    pruningEnabled: false
+  properties:
+    ci:
+      codebase:
+        connectorRef: harnessgit
+        build: <+input>
