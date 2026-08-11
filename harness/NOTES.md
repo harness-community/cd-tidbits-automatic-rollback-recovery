@@ -4,3 +4,4 @@ Harness setup:
 - Configure StageRollback failure strategy.
 - First deploy v1.
 - Then deploy v2 to trigger rollback.
+    
